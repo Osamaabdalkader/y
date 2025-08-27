@@ -50,6 +50,7 @@ const authPage = document.getElementById('auth-page');
 const addPostPage = document.getElementById('add-post-page');
 const profilePage = document.getElementById('profile-page');
 const messagesPage = document.getElementById('messages-page');
+const productDetailsPage = document.getElementById('product-details-page');
 const loadingOverlay = document.getElementById('loading-overlay');
 const uploadProgress = document.getElementById('upload-progress');
 
@@ -74,6 +75,7 @@ const closeAuthBtn = document.getElementById('close-auth');
 const closeAddPostBtn = document.getElementById('close-add-post');
 const closeProfileBtn = document.getElementById('close-profile');
 const closeMessagesBtn = document.getElementById('close-messages');
+const closeProductDetailsBtn = document.getElementById('close-product-details');
 
 // عناصر رفع الصورة
 const postImageInput = document.getElementById('post-image');
@@ -83,19 +85,6 @@ const imageName = document.getElementById('image-name');
 const imagePreview = document.getElementById('image-preview');
 const previewImg = document.getElementById('preview-img');
 const removeImageBtn = document.getElementById('remove-image-btn');
-
-// عناصر صفحة تفاصيل المنتج
-const productDetailsPage = document.getElementById('product-details-page');
-const closeProductDetailsBtn = document.getElementById('close-product-details');
-const productDetailImage = document.getElementById('product-detail-image');
-const productDetailTitle = document.getElementById('product-detail-title');
-const productDetailDescription = document.getElementById('product-detail-description');
-const productDetailPrice = document.getElementById('product-detail-price');
-const productDetailLocation = document.getElementById('product-detail-location');
-const productDetailAuthor = document.getElementById('product-detail-author');
-const productDetailPhone = document.getElementById('product-detail-phone');
-const productDetailDate = document.getElementById('product-detail-date');
-const buyNowBtn = document.getElementById('buy-now-btn');
 
 // عناصر نظام الرسائل
 const messagesList = document.getElementById('messages-list');
@@ -109,6 +98,17 @@ const adminEmail = document.getElementById('admin-email');
 const makeAdminBtn = document.getElementById('make-admin-btn');
 const refreshUsersBtn = document.getElementById('refresh-users-btn');
 const usersList = document.getElementById('users-list');
+
+// عناصر صفحة تفاصيل المنتج
+const productDetailImage = document.getElementById('product-detail-image');
+const productDetailTitle = document.getElementById('product-detail-title');
+const productDetailDescription = document.getElementById('product-detail-description');
+const productDetailPrice = document.getElementById('product-detail-price');
+const productDetailLocation = document.getElementById('product-detail-location');
+const productDetailAuthor = document.getElementById('product-detail-author');
+const productDetailPhone = document.getElementById('product-detail-phone');
+const productDetailDate = document.getElementById('product-detail-date');
+const buyNowBtn = document.getElementById('buy-now-btn');
 
 // تحميل المنشورات عند بدء التحميل
 document.addEventListener('DOMContentLoaded', () => {
@@ -130,7 +130,7 @@ function loadPosts() {
             const posts = snapshot.val();
             Object.keys(posts).reverse().forEach(postId => {
                 const post = posts[postId];
-                createPostCard(post);
+                createPostCard(post, postId);
             });
         } else {
             postsContainer.innerHTML = '<p class="no-posts">لا توجد منشورات بعد. كن أول من ينشر!</p>';
@@ -138,11 +138,40 @@ function loadPosts() {
     });
 }
 
-
-// إغلاق صفحة تفاصيل المنتج
-closeProductDetailsBtn.addEventListener('click', () => {
-    showPage(homePage);
-});
+// إنشاء بطاقة منشور
+function createPostCard(post, postId) {
+    const postCard = document.createElement('div');
+    postCard.className = 'post-card';
+    postCard.setAttribute('data-post-id', postId);
+    
+    // إذا كان هناك صورة، نعرضها. وإلا نعرض أيقونة افتراضية.
+    const imageContent = post.imageUrl 
+        ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}"></div>`
+        : `<div class="post-image"><i class="fas fa-image fa-3x"></i></div>`;
+    
+    postCard.innerHTML = `
+        ${imageContent}
+        <div class="post-content">
+            <h3 class="post-title">${post.title}</h3>
+            <p class="post-description">${post.description}</p>
+            <div class="post-meta">
+                ${post.price ? `<div class="post-price">${post.price}</div>` : ''}
+                <div class="post-location"><i class="fas fa-map-marker-alt"></i> ${post.location}</div>
+            </div>
+            <div class="post-author">
+                <i class="fas fa-user"></i> ${post.authorName}
+                <span class="post-phone">${post.phone}</span>
+            </div>
+        </div>
+    `;
+    
+    // جعل البطاقة قابلة للنقر لفتح التفاصيل
+    postCard.addEventListener('click', () => {
+        openProductDetails(post);
+    });
+    
+    postsContainer.appendChild(postCard);
+}
 
 // فتح صفحة تفاصيل المنتج
 function openProductDetails(post) {
@@ -181,59 +210,6 @@ function openProductDetails(post) {
     // عرض الصفحة
     showPage(productDetailsPage);
 }
-
-
-
-// تعديل دالة إنشاء بطاقة المنشور لجعلها قابلة للنقر
-function createPostCard(post, postId) {
-    const postCard = document.createElement('div');
-    postCard.className = 'post-card';
-    postCard.setAttribute('data-post-id', postId);
-    
-    // إذا كان هناك صورة، نعرضها. وإلا نعرض أيقونة افتراضية.
-    const imageContent = post.imageUrl 
-        ? `<div class="post-image"><img src="${post.imageUrl}" alt="${post.title}"></div>`
-        : `<div class="post-image"><i class="fas fa-image fa-3x"></i></div>`;
-    
-    postCard.innerHTML = `
-        ${imageContent}
-        <div class="post-content">
-            <h3 class="post-title">${post.title}</h3>
-            <p class="post-description">${post.description}</p>
-            <div class="post-meta">
-                ${post.price ? `<div class="post-price">${post.price}</div>` : ''}
-                <div class="post-location"><i class="fas fa-map-marker-alt"></i> ${post.location}</div>
-            </div>
-            <div class="post-author">
-                <i class="fas fa-user"></i> ${post.authorName}
-                <span class="post-phone">${post.phone}</span>
-            </div>
-        </div>
-    `;
-    
-    // جعل البطاقة قابلة للنقر لفتح التفاصيل
-    postCard.addEventListener('click', () => {
-        openProductDetails(post);
-    });
-    
-    postsContainer.appendChild(postCard);
-}
-
-// تعديل دالة تحميل المنشورات لتمرير postId
-function loadPosts() {
-    const postsRef = ref(database, 'posts');
-    onValue(postsRef, (snapshot) => {
-        postsContainer.innerHTML = '';
-        
-        if (snapshot.exists()) {
-            const posts = snapshot.val();
-            Object.keys(posts).reverse().forEach(postId => {
-                const post = posts[postId];
-                createPostCard(post, postId);
-            });
-        } else {
-            postsContainer.innerHTML = '<p class="no-posts">لا توجد منشورات بعد. كن أول من ينشر!</p>';
-        }
 
 // تسجيل الدخول
 loginBtn.addEventListener('click', e => {
@@ -505,6 +481,11 @@ closeMessagesBtn.addEventListener('click', () => {
     showPage(homePage);
 });
 
+// إغلاق صفحة تفاصيل المنتج
+closeProductDetailsBtn.addEventListener('click', () => {
+    showPage(homePage);
+});
+
 // تغيير علامات التوثيق
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -638,7 +619,7 @@ makeAdminBtn.addEventListener('click', () => {
         });
         
         if (!userFound) {
-            alert('لم يتم العثور على مستخدم بهذا البريد الإlectronي');
+            alert('لم يتم العثور على مستخدم بهذا البريد الإلكتروني');
         }
     }, { onlyOnce: true });
 });
@@ -866,4 +847,4 @@ function resetAuthForms() {
     document.getElementById('signup-address').value = '';
     authMessage.textContent = '';
     authMessage.className = '';
-  }
+    }
